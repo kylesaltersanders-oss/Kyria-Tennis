@@ -401,7 +401,7 @@
     const nowM = sydToday().slice(0, 7);
     const s = new Set(lastBookings.map((r) => String(r.date).slice(0, 7)));
     for (const m of manual) { const mm = m.date.slice(0, 7); if (mm >= nowM) s.add(mm); }
-    return [...s].sort();
+    return [...s].filter((m) => m >= nowM).sort();
   }
   function refreshMonths() {
     const months = allMonths();
