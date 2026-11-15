@@ -498,6 +498,9 @@
     if (!reDate.test(date) || !reTime.test(s)) return '';
     const a = toMin(s), b = reTime.test(e) && toMin(e) > a ? toMin(e) : a + 60;
     const notes = [];
+    const dow = new Date(date + 'T00:00:00Z').getUTCDay();
+    if (dow === 1 && a < 13 * 60 && b > 9 * 60) notes.push('Heads up: this falls in your blocked Monday 9am to 1pm window.');
+    if (dow === 4 && a < 14 * 60 && b > 9 * 60) notes.push('Heads up: this falls in your blocked Thursday 9am to 2pm window.');
     for (const r of lastBookings) {
       if (r.who !== who || r.date !== date || !(r.status === 'Confirmed' || r.status === 'Tentative')) continue;
       if (toMin(r.start) < b && toMin(r.end) > a) notes.push('Overlaps the ' + r.title + ' booking, ' + r.start + ' to ' + r.end + '.');
