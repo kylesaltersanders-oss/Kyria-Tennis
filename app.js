@@ -249,6 +249,7 @@
     const time = ((h % 12) || 12) + ':' + String(m).padStart(2, '0') + (h < 12 ? 'am' : 'pm');
     return 'Kyle for ' + day + ' ' + time + ', ' + r.title + '. Ref TD-' + String(r.id).replace(/^ash-/, '');
   };
+  const askBody = (r) => textBody(r).replace(/^Kyle for /, 'Can I hit with Kyle on ').replace(/\. Ref TD-.*$/, '? Ref TK-' + r.id);
   const partnerPill = (r, onEdit) => {
     const p = partnerOf(r);
     const btn = document.createElement('button');
@@ -258,13 +259,17 @@
         btn.disabled = true;
     btn.addEventListener('click', onEdit);
     const quick = r.who === 'Ash' ? 'Kyle' : (r.who === 'Kyle' || r.who === 'Giga') ? 'Ash' : '';
-    if (p || r.who !== 'Ash' || !/^ash-/.test(String(r.id)) || !isFutureSyd(r)) return btn;
-    // Tap to text: opens a message to the confirmations line; the hourly task sets Kyle as partner when it comes from Ash's number.
+    if (p || !isFutureSyd(r)) return btn;
+    // Tap to text: opens a message to the confirmations line, acted on only when it comes from Ash's number.
+    // On Ash's sessions the hourly task sets Kyle as partner; on Kyle's and Giga's it asks Kyle to accept.
+    const mine = r.who === 'Ash' && /^ash-/.test(String(r.id));
+    const kyles = (r.who === 'Kyle' || r.who === 'Giga') && /^(arc|cal)-/.test(String(r.id)) && r.status === 'Confirmed';
+    if (!mine && !kyles) return btn;
     const wrap = document.createElement('span');
     const a = document.createElement('a');
-    a.className = 'tb-pt add tb-pt-quick'; a.textContent = '+ Kyle';
-    a.title = 'Text to make Kyle your hitting partner';
-    a.href = 'sms:' + TEXT_LINE + '?&body=' + encodeURIComponent(textBody(r));
+    a.className = 'tb-pt add tb-pt-quick'; a.textContent = mine ? '+ Kyle' : '+ Ash';
+    a.title = mine ? 'Text to make Kyle your hitting partner' : 'Text to ask Kyle to hit with you';
+    a.href = 'sms:' + TEXT_LINE + '?&body=' + encodeURIComponent(mine ? textBody(r) : askBody(r));
     wrap.append(btn, document.createTextNode(' '), a);
     return wrap;
   };
