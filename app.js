@@ -235,6 +235,20 @@
     box.append(sent, conf);
     return box;
   };
+  const TEXT_LINE = '+12233068339';
+  const sydNow = () => {
+    const f = new Intl.DateTimeFormat('en-CA', { timeZone: 'Australia/Sydney', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' });
+    const o = Object.fromEntries(f.formatToParts(new Date()).map((x) => [x.type, x.value]));
+    return o.year + '-' + o.month + '-' + o.day + ' ' + o.hour + ':' + o.minute;
+  };
+  const isFutureSyd = (r) => (String(r.date) + ' ' + String(r.start || '00:00')) > sydNow();
+  const textBody = (r) => {
+    const d = new Date(r.date + 'T00:00:00Z');
+    const day = d.toLocaleDateString('en-AU', { timeZone: 'UTC', weekday: 'short', day: 'numeric', month: 'short' }).replace(',', '');
+    const [h, m] = String(r.start).split(':').map(Number);
+    const time = ((h % 12) || 12) + ':' + String(m).padStart(2, '0') + (h < 12 ? 'am' : 'pm');
+    return 'Kyle for ' + day + ' ' + time + ', ' + r.title + '. Ref TD-' + String(r.id).replace(/^ash-/, '');
+  };
   const partnerPill = (r, onEdit) => {
     const p = partnerOf(r);
     const btn = document.createElement('button');
@@ -244,14 +258,14 @@
         btn.disabled = true;
     btn.addEventListener('click', onEdit);
     const quick = r.who === 'Ash' ? 'Kyle' : (r.who === 'Kyle' || r.who === 'Giga') ? 'Ash' : '';
-    return btn;
+    if (p || r.who !== 'Ash' || !/^ash-/.test(String(r.id)) || !isFutureSyd(r)) return btn;
+    // Tap to text: opens a message to the confirmations line; the hourly task sets Kyle as partner when it comes from Ash's number.
     const wrap = document.createElement('span');
-    const qb = document.createElement('button');
-    qb.type = 'button'; qb.className = 'tb-pt add tb-pt-quick'; qb.textContent = '+ ' + quick;
-    qb.title = 'Confirm ' + quick + ' as the hitting partner';
-    qb.disabled = !partnerDb;
-    qb.addEventListener('click', async () => { qb.disabled = true; await savePartner(r.id, quick); redrawPartners(); });
-    wrap.append(btn, document.createTextNode(' '), qb);
+    const a = document.createElement('a');
+    a.className = 'tb-pt add tb-pt-quick'; a.textContent = '+ Kyle';
+    a.title = 'Text to make Kyle your hitting partner';
+    a.href = 'sms:' + TEXT_LINE + '?&body=' + encodeURIComponent(textBody(r));
+    wrap.append(btn, document.createTextNode(' '), a);
     return wrap;
   };
   function redrawPartners() {

@@ -6,3 +6,4 @@ body{margin:0;background:var(--color-bg);color:var(--color-fg)}
 main{max-width:1200px;margin:0 auto;padding:24px 16px 48px;position:relative}
 .tb-pt:disabled{cursor:default;color:var(--color-fg-muted)}.tb-pt.conf:disabled{color:var(--color-ok)}.tb-pt.tent:disabled{color:var(--color-warn)}
 @media (max-width:560px){.tb-ext-list .grow{flex-basis:100%}}
+a.tb-pt{text-decoration:none}a.tb-pt.tb-pt-quick{color:var(--color-ok);border-style:solid}
